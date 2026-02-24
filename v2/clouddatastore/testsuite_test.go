@@ -30,6 +30,30 @@ import (
 
 func cleanUp() error {
 	ctx := context.Background()
+
+	// Clear Memcache
+	if addr := os.Getenv("MEMCACHE_ADDR"); addr != "" {
+		mc := memcache.New(addr)
+		_ = mc.FlushAll()
+	}
+
+	// Clear Redis
+	host := os.Getenv("REDIS_HOST")
+	port := os.Getenv("REDIS_PORT")
+	if host != "" || port != "" {
+		if host == "" {
+			host = "localhost"
+		}
+		if port == "" {
+			port = "6379"
+		}
+		conn, err := redis.Dial("tcp", net.JoinHostPort(host, port))
+		if err == nil {
+			_, _ = conn.Do("FLUSHDB")
+			_ = conn.Close()
+		}
+	}
+
 	client, err := FromContext(ctx)
 	if err != nil {
 		return err
