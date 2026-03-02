@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - feat-v2-update-go1.24
 
 jobs:
   test-v2:
