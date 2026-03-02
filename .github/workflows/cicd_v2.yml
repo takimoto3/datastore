@@ -36,7 +36,7 @@ jobs:
         with:
           version: ${{ env.GCLOUD_VERSION }}
           project_id: ${{ env.DATASTORE_PROJECT_ID }}
-          install_components: app-engine-go,cloud-datastore-emulator,beta
+          install_components: app-engine-go,cloud-firestore-emulator,beta
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
@@ -44,8 +44,9 @@ jobs:
           java-version: '21'
       - name: Spinup Datastore Emulator
         run: |-
-          gcloud beta emulators datastore start --project=${{ env.DATASTORE_PROJECT_ID }} --host-port=0.0.0.0:8081 --no-store-on-disk --use-firestore-in-datastore-mode &
+          gcloud emulators firestore start --project=${{ env.DATASTORE_PROJECT_ID }} --host-port=0.0.0.0:8081 --database-mode=datastore-mode &
           curl http://localhost:8081 --silent --retry 30 --retry-connrefused --retry-delay 1
+
       - name: Run v2 tests
         run: |-
           ./v2/setup.sh

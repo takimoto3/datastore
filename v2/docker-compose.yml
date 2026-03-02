@@ -3,7 +3,7 @@ services:
     image: gcr.io/google.com/cloudsdktool/google-cloud-cli:555.0.0-emulators
     ports:
       - "8081:8081"
-    command: gcloud --project=datastore-wrapper beta emulators datastore start --host-port=0.0.0.0:8081 --no-store-on-disk --use-firestore-in-datastore-mode
+    command: gcloud --project=datastore-wrapper emulators firestore start --host-port=0.0.0.0:8081 --database-mode=datastore-mode
 
   redis:
     image: redis:6-alpine
