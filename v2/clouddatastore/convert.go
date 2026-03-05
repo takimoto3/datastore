@@ -110,6 +110,9 @@ func toWrapperError(err error) error {
 	case err == datastore.ErrConcurrentTransaction:
 		return w.ErrConcurrentTransaction
 
+	case err.Error() == "datastore: concurrent transaction":
+		return w.ErrConcurrentTransaction
+
 	case err == datastore.ErrInvalidEntityType:
 		return w.ErrInvalidEntityType
 

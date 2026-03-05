@@ -170,10 +170,13 @@ func transactionJoinAncesterQuery(ctx context.Context, t *testing.T, client data
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer tx1.Rollback()
+
 	tx2, err := client.NewTransaction(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer tx2.Rollback()
 
 	q := client.NewQuery("Data").Transaction(tx1).Ancestor(parentKey)
 	var list1 []*Data
@@ -204,14 +207,17 @@ func transactionJoinAncesterQuery(ctx context.Context, t *testing.T, client data
 		t.Fatal(err)
 	}
 
-	_, err = tx2.Commit()
-	if err != nil {
-		t.Fatal(err)
-	}
+	_, err2 := tx2.Commit()
+	_, err1 := tx1.Commit()
 
-	_, err = tx1.Commit()
-	if err != datastore.ErrConcurrentTransaction {
-		t.Fatal(err)
+	// In Cloud Datastore (Optimistic), tx2 usually succeeds and tx1 fails.
+	// In Firestore Emulator (Pessimistic), tx2 might fail first if tx1 has already "touched" the data.
+	// The core requirement is that one succeeds and the other fails with ErrConcurrentTransaction.
+	if (err1 == nil && err2 == datastore.ErrConcurrentTransaction) ||
+		(err2 == nil && err1 == datastore.ErrConcurrentTransaction) {
+		// Success: a conflict was detected and handled correctly.
+	} else {
+		t.Fatalf("expected one transaction to succeed and the other to fail with concurrent transaction error. got tx1: %v, tx2: %v", err1, err2)
 	}
 }
 

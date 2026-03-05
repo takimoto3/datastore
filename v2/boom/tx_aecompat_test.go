@@ -21,6 +21,7 @@ func TestBoomAECompatTransaction_Put(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer txOrig.Rollback()
 
 	tx := ToAECompatibleTransaction(txOrig)
 
@@ -51,6 +52,7 @@ func TestBoomAECompatTransaction_PutMulti(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer txOrig.Rollback()
 
 	tx := ToAECompatibleTransaction(txOrig)
 
@@ -90,6 +92,7 @@ func TestBoomAECompatTransaction_Get(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer txOrig.Rollback()
 
 	tx := ToAECompatibleTransaction(txOrig)
 
@@ -126,6 +129,7 @@ func TestBoomAECompatTransaction_GetMulti(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer txOrig.Rollback()
 
 	tx := ToAECompatibleTransaction(txOrig)
 
@@ -163,6 +167,7 @@ func TestBoomAECompatTransaction_Delete(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer txOrig.Rollback()
 
 	tx := ToAECompatibleTransaction(txOrig)
 
@@ -195,6 +200,7 @@ func TestBoomAECompatTransaction_DeleteMulti(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer txOrig.Rollback()
 
 	tx := ToAECompatibleTransaction(txOrig)
 

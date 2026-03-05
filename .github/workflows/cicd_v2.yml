@@ -1,0 +1,54 @@
+name: 'CI'
+
+on:
+  push:
+    branches:
+      - master
+      - feat-v2-update-go1.24
+
+jobs:
+  test-v2:
+    name: Test v2
+    runs-on: ubuntu-latest
+    env:
+      GCLOUD_VERSION: "555.0.0"
+      DATASTORE_PROJECT_ID: unittest
+      DATASTORE_EMULATOR_HOST: localhost:8081
+      REDIS_HOST: localhost
+      MEMCACHE_ADDR: localhost:11211
+    services:
+      redis:
+        image: redis:6-alpine
+        ports:
+          - "6379:6379"
+      memcached:
+        image: memcached:1.6-alpine
+        ports:
+          - "11211:11211"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          version: ${{ env.GCLOUD_VERSION }}
+          project_id: ${{ env.DATASTORE_PROJECT_ID }}
+          install_components: app-engine-go,cloud-firestore-emulator,beta
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Spinup Datastore Emulator
+        run: |-
+          gcloud emulators firestore start --project=${{ env.DATASTORE_PROJECT_ID }} --host-port=0.0.0.0:8081 --database-mode=datastore-mode &
+          curl http://localhost:8081 --silent --retry 30 --retry-connrefused --retry-delay 1
+
+      - name: Run v2 tests
+        run: |-
+          ./v2/setup.sh
+          ./v2/test.sh
